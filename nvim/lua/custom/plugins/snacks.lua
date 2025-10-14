@@ -51,7 +51,7 @@ return {
     gitbrowse = { enabled = true },
     notifier = {
       enabled = true,
-      timeout = 5000,
+      timeout = 4000,
       border = 'rounded',
     },
     dashboard = {
@@ -61,7 +61,7 @@ return {
         {
           pane = 2,
           section = 'terminal',
-          cmd = '/home/transpara/shell-color-scripts/colorscript.sh -e square',
+          cmd = '/home/dieguscl/shell-color-scripts/colorscript.sh -e square',
           height = 5,
           padding = 1,
         },
@@ -104,17 +104,6 @@ return {
               --   vim.fn.jobstart('gh pr list --web', { detach = true })
               -- end,
               height = 7,
-            },
-            {
-              title = 'Notifications',
-              cmd = 'gh notify -s -a -n5',
-              -- action = function()
-              --   vim.ui.open 'https://github.com/notifications'
-              -- end,
-              -- key = 'n',
-              -- icon = ' ',
-              height = 5,
-              enabled = true,
             },
           }
           return vim.tbl_map(function(cmd)

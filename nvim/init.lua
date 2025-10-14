@@ -1169,3 +1169,20 @@ vim.keymap.set('v', '<C-i>', '"hy:%s/<C-r>h//gc<left><left><left>', { desc = 'Re
 
 -- Open mini.files
 vim.api.nvim_set_keymap('n', '<leader>mf', ":lua require('mini.files').open()<CR>", { noremap = true, silent = true })
+
+--start
+-- I added this because I got an error when using
+-- ngo to definition using gopls, I don't think it's
+-- needed though
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+
+-- Add this special comment to disable the warning for the next line
+---@diagnostic disable-next-line: inject-field
+capabilities.textDocument.positionEncoding = { 'utf-8', 'utf-16' }
+-- end
+--
+-- Map Shift+Space to typing _ (underscore)
+vim.keymap.set('i', '<C-u>', '_', { noremap = true, silent = true }) 
+
+
+

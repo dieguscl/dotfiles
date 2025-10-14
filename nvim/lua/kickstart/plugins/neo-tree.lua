@@ -9,7 +9,15 @@ return {
     'nvim-tree/nvim-web-devicons', -- not strictly required, but recommended
     'MunifTanjim/nui.nvim',
     -- not working
-    '3rd/image.nvim',
+    {
+      '3rd/image.nvim',
+      opts = {
+        rocks = {
+          enabled = false,
+          hererocks = true,
+        },
+      },
+    },
   },
   cmd = 'Neotree',
   keys = {

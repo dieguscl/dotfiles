@@ -36,7 +36,7 @@ return {
       -- elsewhere in your config, without redefining it, via `opts_extend`
       sources = {
 
-        default = { 'supermaven', 'lsp', 'path', 'snippets', 'buffer' },
+        default = { 'lsp', 'path', 'snippets', 'buffer' },
         -- optionally disable cmdline completions
         -- cmdline = {},
       },
