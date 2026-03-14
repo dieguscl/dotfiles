@@ -2,7 +2,7 @@
 # Claude Code Stop hook - sends response back to Telegram
 # Install: copy to ~/.claude/hooks/ and add to ~/.claude/settings.json
 
-TELEGRAM_BOT_TOKEN="${TELEGRAM_BOT_TOKEN:?Set TELEGRAM_BOT_TOKEN env var}"
+[ -z "$TELEGRAM_BOT_TOKEN" ] && exit 0
 INPUT=$(cat)
 CHAT_ID_FILE=~/.claude/telegram_chat_id
 PENDING_FILE=~/.claude/telegram_pending

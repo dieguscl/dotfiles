@@ -80,15 +80,36 @@ done
 echo ""
 echo "Setting up dotfiles auto-pull..."
 
-CRON_CMD="cd $DOTFILES_DIR && git pull --ff-only --quiet 2>/dev/null"
-CRON_ENTRY="*/30 * * * * $CRON_CMD"
+# Install cronie if crontab is not available
+if ! command -v crontab &> /dev/null; then
+    echo "crontab not found. Installing cronie..."
+    if command -v pacman &> /dev/null; then
+        sudo pacman -S --noconfirm cronie
+        sudo systemctl enable --now cronie
+    elif command -v apt-get &> /dev/null; then
+        sudo apt-get install -y cron
+        sudo systemctl enable --now cron
+    elif command -v dnf &> /dev/null; then
+        sudo dnf install -y cronie
+        sudo systemctl enable --now crond
+    else
+        echo "⚠️  Could not install cron. Please install it manually."
+    fi
+fi
 
-# Add cron job if not already present
-if crontab -l 2>/dev/null | grep -qF "$DOTFILES_DIR" ; then
-    echo "Dotfiles auto-pull cron already exists."
+CRON_CMD="cd $DOTFILES_DIR && git pull --ff-only --quiet 2>/dev/null"
+CRON_ENTRY="0 9 * * * $CRON_CMD"
+
+# Add cron job if crontab is available
+if command -v crontab &> /dev/null; then
+    if crontab -l 2>/dev/null | grep -qF "$DOTFILES_DIR" ; then
+        echo "Dotfiles auto-pull cron already exists."
+    else
+        (crontab -l 2>/dev/null; echo "$CRON_ENTRY") | crontab -
+        echo "Added cron: pull dotfiles daily at 9am."
+    fi
 else
-    (crontab -l 2>/dev/null; echo "$CRON_ENTRY") | crontab -
-    echo "Added cron: pull dotfiles every 30 minutes."
+    echo "⚠️  Skipping cron setup — crontab not available."
 fi
 
 # --- 4. Final Instructions ---
@@ -97,4 +118,4 @@ echo "✅ Setup complete!"
 echo "Next steps:"
 echo "1. Start tmux and press 'prefix + I' (C-Space + I) to install tmux plugins."
 echo "2. Start nvim and lazy.nvim should automatically install all neovim plugins."
-echo "3. Set TELEGRAM_BOT_TOKEN env var if using the Telegram bridge hook."
+echo "3. Optionally set TELEGRAM_BOT_TOKEN env var to enable the Telegram bridge hook."
