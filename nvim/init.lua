@@ -320,6 +320,7 @@ require('lazy').setup({
         { '<leader>w', group = '[W]orkspace' },
         { '<leader>t', group = '[T]oggle' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+        { '<leader>x', group = 'Trouble' },
       },
     },
   },
@@ -995,6 +996,27 @@ require('lazy').setup({
 --
 -- *********** CUSTOM CODE **********
 
+-- Close current buffer
+vim.keymap.set('n', '<leader>bd', '<cmd>bd<CR>', { desc = '[B]uffer [D]elete' })
+
+-- Move selected lines up/down
+vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv", { desc = 'Move selection down' })
+vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv", { desc = 'Move selection up' })
+
+-- Yank to system clipboard
+vim.keymap.set({ 'n', 'v' }, '<leader>y', '"+y', { desc = '[Y]ank to clipboard' })
+
+-- Center screen after half-page jumps
+vim.keymap.set('n', '<C-d>', '<C-d>zz', { desc = 'Half-page down (centered)' })
+vim.keymap.set('n', '<C-u>', '<C-u>zz', { desc = 'Half-page up (centered)' })
+
+-- Keep cursor in place when joining lines
+vim.keymap.set('n', 'J', 'mzJ`z', { desc = 'Join lines (keep cursor)' })
+
+-- Add blank line without entering insert mode
+vim.keymap.set('n', 'go', 'o<Esc>k', { desc = 'Blank line below' })
+vim.keymap.set('n', 'gO', 'O<Esc>j', { desc = 'Blank line above' })
+
 local function toggle_diagnostics()
   local current_config = vim.diagnostic.config()
   if current_config then
@@ -1009,186 +1031,14 @@ end
 
 vim.keymap.set('n', '<leader>dt', toggle_diagnostics, { desc = '[D]iagnostics [T]oggle' })
 
--- mini.animate messed up my mousescroll, so I did this
--- I took the opportunity to make the scroll faster as well
-vim.o.mousescroll = 'ver:40,hor:6'
-
-local prettier = {
-  formatCommand = 'prettierd "${INPUT}"',
-  formatStdin = true,
-  env = {
-    string.format('PRETTIERD_DEFAULT_CONFIG=%s', vim.fn.expand '~/.config/nvim/utils/linter-config/.prettierrc.json'),
-  },
-}
-
--- Jump between buffers instead of jumplists, similar to M-<- and M-> in VsCode
--- https://github.com/kwkarlwang/bufjump.nvim/blob/master/lua/bufjump.lua
---
-local on_success = nil
-
-local jumpbackward = function(num)
-  vim.cmd([[execute "normal! ]] .. tostring(num) .. [[\<c-o>"]])
-end
-
-local jumpforward = function(num)
-  vim.cmd([[execute "normal! ]] .. tostring(num) .. [[\<c-i>"]])
-end
-
-local backward = function()
-  local getjumplist = vim.fn.getjumplist()
-  local jumplist = getjumplist[1]
-  if #jumplist == 0 then
-    return
-  end
-
-  -- plus one because of one index
-  local i = getjumplist[2] + 1
-  local j = i
-  local curBufNum = vim.fn.bufnr()
-  local targetBufNum = curBufNum
-
-  while j > 1 and (curBufNum == targetBufNum or not vim.api.nvim_buf_is_valid(targetBufNum)) do
-    j = j - 1
-    targetBufNum = jumplist[j].bufnr
-  end
-  if targetBufNum ~= curBufNum and vim.api.nvim_buf_is_valid(targetBufNum) then
-    jumpbackward(i - j)
-    if on_success then
-      on_success()
-    end
-  end
-end
-
-local backward_same_buf = function()
-  local jumplistAndPos = vim.fn.getjumplist()
-
-  local jumplist = jumplistAndPos[1]
-  if #jumplist == 0 then
-    return
-  end
-  local lastUsedJumpPos = jumplistAndPos[2] + 1
-  local curBufNum = vim.fn.bufnr()
-
-  local j = lastUsedJumpPos
-  local foundJump = false
-  repeat
-    j = j - 1
-    if j > 0 and (curBufNum == jumplist[j].bufnr and vim.api.nvim_buf_is_valid(jumplist[j].bufnr)) then
-      foundJump = true
-    end
-  until j == 0 or foundJump
-
-  if foundJump then
-    jumpbackward(lastUsedJumpPos - j)
-    if on_success then
-      on_success()
-    end
-  end
-end
-
-local forward = function()
-  local getjumplist = vim.fn.getjumplist()
-  local jumplist = getjumplist[1]
-  if #jumplist == 0 then
-    return
-  end
-
-  local i = getjumplist[2] + 1
-  local j = i
-  local curBufNum = vim.fn.bufnr()
-  local targetBufNum = curBufNum
-
-  -- find the next different buffer
-  while j < #jumplist and (curBufNum == targetBufNum or vim.api.nvim_buf_is_valid(targetBufNum) == false) do
-    j = j + 1
-    targetBufNum = jumplist[j].bufnr
-  end
-  while j + 1 <= #jumplist and jumplist[j + 1].bufnr == targetBufNum and vim.api.nvim_buf_is_valid(targetBufNum) do
-    j = j + 1
-  end
-  if j <= #jumplist and targetBufNum ~= curBufNum and vim.api.nvim_buf_is_valid(targetBufNum) then
-    jumpforward(j - i)
-
-    if on_success then
-      on_success()
-    end
-  end
-end
-
-local forward_same_buf = function()
-  local jumplistAndPos = vim.fn.getjumplist()
-  local jumplist = jumplistAndPos[1]
-  if #jumplist == 0 then
-    return
-  end
-  local lastUsedJumpPos = jumplistAndPos[2] + 1
-  local curBufNum = vim.fn.bufnr()
-
-  local j = lastUsedJumpPos
-  local foundJump = false
-  repeat
-    j = j + 1
-    if j <= #jumplist and curBufNum == jumplist[j].bufnr and vim.api.nvim_buf_is_valid(jumplist[j].bufnr) then
-      foundJump = true
-    end
-  until j > #jumplist or foundJump
-
-  if foundJump then
-    jumpforward(j - lastUsedJumpPos)
-    if on_success then
-      on_success()
-    end
-  end
-end
-
-local setup = function(cfg)
-  cfg = cfg or {}
-  if cfg.forward_key ~= false then
-    local forward_key = cfg.forward_key or '<C-n>'
-    vim.keymap.set('n', forward_key, forward)
-  end
-  if cfg.backward_key ~= false then
-    local backward_key = cfg.backward_key or '<C-p>'
-    vim.keymap.set('n', backward_key, backward)
-  end
-  if cfg.forward_same_buf_key then
-    vim.keymap.set('n', cfg.forward_same_buf_key, forward_same_buf)
-  end
-  if cfg.backward_same_buf_key then
-    vim.keymap.set('n', cfg.backward_same_buf_key, backward_same_buf)
-  end
-end
-
-setup {
-  forward_key = 'C-i',
-  backward_key = 'C-o',
-  forward_same_buf_key = 'C-I',
-  backward_same_buf_key = 'C-O',
-}
-
--- https://stackoverflow.com/questions/676600/vim-search-and-replace-selected-text
-vim.keymap.set('v', '<C-i>', '"hy:%s/<C-r>h//gc<left><left><left>', { desc = 'Replace selected text' })
+-- Search and replace selected text
+vim.keymap.set('v', '<leader>R', '"hy:%s/<C-r>h//gc<left><left><left>', { desc = '[R]eplace selected text' })
 
 -- Open mini.files
-vim.api.nvim_set_keymap('n', '<leader>mf', ":lua require('mini.files').open()<CR>", { noremap = true, silent = true })
+vim.keymap.set('n', '<leader>mf', function() require('mini.files').open() end, { desc = '[M]ini [F]iles' })
 
---start
--- I added this because I got an error when using
--- ngo to definition using gopls, I don't think it's
--- needed though
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-
--- Add this special comment to disable the warning for the next line
----@diagnostic disable-next-line: inject-field
-capabilities.textDocument.positionEncoding = { 'utf-8', 'utf-16' }
--- end
---
--- Map Shift+Space to typing _ (underscore)
+-- Map Ctrl+U to underscore in insert mode
 vim.keymap.set('i', '<C-u>', '_', { noremap = true, silent = true })
-
--- Toggle scroll animation
-local rhs = '<Cmd>lua MiniAnimate.config.scroll.enable = not MiniAnimate.config.scroll.enable<CR>'
-vim.keymap.set('n', '<Leader>ts', rhs, { desc = 'Toggle scroll animation' })
 
 -- Enable OSC 52 clipboard support for SSH
 vim.g.clipboard = {

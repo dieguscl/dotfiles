@@ -10,7 +10,12 @@
       "Bash(gh auth:*)",
       "Bash(gh repo:*)",
       "Bash(git remote:*)",
-      "Bash(git:*)"
+      "Bash(git:*)",
+      "Bash(pacman:*)",
+      "Bash(bash -c '\nDOTFILES_DIR=\"$\\(pwd\\)\"\n\nif ! command -v crontab &> /dev/null; then\n    echo \"crontab not found. Installing cronie...\"\n    sudo pacman -S --noconfirm cronie\n    sudo systemctl enable --now cronie\nfi\n\nCRON_CMD=\"cd $DOTFILES_DIR && git pull --ff-only --quiet 2>/dev/null\"\nCRON_ENTRY=\"0 9 * * * $CRON_CMD\"\n\nif crontab -l 2>/dev/null | grep -qF \"$DOTFILES_DIR\" ; then\n    echo \"Dotfiles auto-pull cron already exists.\"\nelse\n    \\(crontab -l 2>/dev/null; echo \"$CRON_ENTRY\"\\) | crontab -\n    echo \"Added cron: pull dotfiles daily at 9am.\"\nfi\n')",
+      "Bash(echo:*)",
+      "Bash(bash install.sh)",
+      "Bash(npx skills:*)"
     ]
   }
 }
