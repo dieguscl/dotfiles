@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/send-to-telegram.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash ~/.claude/statusline-command.sh"
+  },
+  "skipDangerousModePermissionPrompt": true,
+  "effortLevel": "high",
+  "extraKnownMarketplaces": {
+    "medusa": {
+      "source": {
+        "source": "github",
+        "repo": "medusajs/medusa-agent-skills"
+      }
+    }
+  }
+}

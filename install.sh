@@ -48,6 +48,9 @@ link_file() {
     ln -s "$source_file" "$target_file"
 }
 
+# Link shell aliases (sourced by .bashrc via ~/.bash_aliases)
+link_file "$DOTFILES_DIR/aliases.sh" "$HOME/.bash_aliases"
+
 # Link Neovim configuration
 link_file "$DOTFILES_DIR/nvim" "$HOME/.config/nvim"
 
@@ -56,9 +59,42 @@ link_file "$DOTFILES_DIR/.tmux.conf" "$HOME/.tmux.conf"
 link_file "$DOTFILES_DIR/tmux-sessionizer" "$HOME/.local/bin/tmux-sessionizer"
 link_file "$DOTFILES_DIR/tmux-windowizer" "$HOME/.local/bin/tmux-windowizer"
 
-# --- 3. Final Instructions ---
+# Link Claude Code configuration
+echo ""
+echo "Linking Claude Code configuration..."
+mkdir -p "$HOME/.claude/hooks" "$HOME/.claude/skills"
+
+link_file "$DOTFILES_DIR/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
+link_file "$DOTFILES_DIR/claude/settings.json" "$HOME/.claude/settings.json"
+link_file "$DOTFILES_DIR/claude/settings.local.json" "$HOME/.claude/settings.local.json"
+link_file "$DOTFILES_DIR/claude/statusline-command.sh" "$HOME/.claude/statusline-command.sh"
+link_file "$DOTFILES_DIR/claude/hooks/send-to-telegram.sh" "$HOME/.claude/hooks/send-to-telegram.sh"
+
+# Link each skill individually so locally-added skills are preserved
+for skill_dir in "$DOTFILES_DIR/claude/skills"/*/; do
+    skill_name=$(basename "$skill_dir")
+    link_file "$skill_dir" "$HOME/.claude/skills/$skill_name"
+done
+
+# --- 3. Auto-pull cron ---
+echo ""
+echo "Setting up dotfiles auto-pull..."
+
+CRON_CMD="cd $DOTFILES_DIR && git pull --ff-only --quiet 2>/dev/null"
+CRON_ENTRY="*/30 * * * * $CRON_CMD"
+
+# Add cron job if not already present
+if crontab -l 2>/dev/null | grep -qF "$DOTFILES_DIR" ; then
+    echo "Dotfiles auto-pull cron already exists."
+else
+    (crontab -l 2>/dev/null; echo "$CRON_ENTRY") | crontab -
+    echo "Added cron: pull dotfiles every 30 minutes."
+fi
+
+# --- 4. Final Instructions ---
 echo ""
 echo "✅ Setup complete!"
 echo "Next steps:"
 echo "1. Start tmux and press 'prefix + I' (C-Space + I) to install tmux plugins."
 echo "2. Start nvim and lazy.nvim should automatically install all neovim plugins."
+echo "3. Set TELEGRAM_BOT_TOKEN env var if using the Telegram bridge hook."

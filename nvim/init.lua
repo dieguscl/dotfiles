@@ -718,6 +718,8 @@ require('lazy').setup({
         javascriptreact = { 'prettierd', 'prettier', stop_after_first = true },
         typescript = { 'prettierd', 'prettier', stop_after_first = true },
         typescriptreact = { 'prettierd', 'prettier', stop_after_first = true },
+        go = { 'goimports' },
+        c = { 'clang-format' },
       },
     },
   },
@@ -1182,7 +1184,21 @@ capabilities.textDocument.positionEncoding = { 'utf-8', 'utf-16' }
 -- end
 --
 -- Map Shift+Space to typing _ (underscore)
-vim.keymap.set('i', '<C-u>', '_', { noremap = true, silent = true }) 
+vim.keymap.set('i', '<C-u>', '_', { noremap = true, silent = true })
 
+-- Toggle scroll animation
+local rhs = '<Cmd>lua MiniAnimate.config.scroll.enable = not MiniAnimate.config.scroll.enable<CR>'
+vim.keymap.set('n', '<Leader>ts', rhs, { desc = 'Toggle scroll animation' })
 
-
+-- Enable OSC 52 clipboard support for SSH
+vim.g.clipboard = {
+  name = 'OSC 52',
+  copy = {
+    ['+'] = require('vim.ui.clipboard.osc52').copy '+',
+    ['*'] = require('vim.ui.clipboard.osc52').copy '*',
+  },
+  paste = {
+    ['+'] = require('vim.ui.clipboard.osc52').paste '+',
+    ['*'] = require('vim.ui.clipboard.osc52').paste '*',
+  },
+}

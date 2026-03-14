@@ -58,13 +58,13 @@ return {
       enabled = true,
       sections = {
         { section = 'header' },
-        {
-          pane = 2,
-          section = 'terminal',
-          cmd = '/home/dieguscl/shell-color-scripts/colorscript.sh -e square',
-          height = 5,
-          padding = 1,
-        },
+        -- {
+        --   pane = 2,
+        --   section = 'terminal',
+        --   cmd = '/home/dieguscl/shell-color-scripts/colorscript.sh -e square',
+        --   height = 5,
+        --   padding = 1,
+        -- },
         { section = 'keys', gap = 1, padding = 1 },
         -- {
         --   pane = 2,
