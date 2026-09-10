@@ -36,6 +36,15 @@ This agent has SSH access to two Transpara Kubernetes clusters and is free to SS
 
 - **Obsidian vault**: `~/diegus-drawer` is the user's Obsidian vault and primary knowledge base. Feel free to read from it for context and write to it to capture new notes, insights, or documentation.
 
+## Skills
+
+- **Transpara skills** (transpara-develop, transpara-infra, transpara-standup, transpara-architect) are maintained in the `agentic-dev-playbook` repo. When updating these skills, make changes there.
+
+## Google Workspace
+
+- **Use `gws` CLI** for all Google Drive file operations (upload, share, list, etc.) and other Google Workspace interactions (Sheets, Gmail, Calendar).
+- Do NOT use rclone or other tools for Drive — always use `gws`.
+
 ## Memory
 
 - **Always use the MCP memory server** for storing and retrieving memories. Do NOT use the auto-memory file system (`~/.claude/projects/*/memory/`). Use `mcp__memory__save_memory` to save and `mcp__memory__query_memory` to recall. Use `project_id=GLOBAL` for cross-project conventions and the project name for project-specific memories.
