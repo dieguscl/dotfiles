@@ -1,0 +1,6 @@
+# Claude/OMC session state
+.omc/
+
+# Python bytecode
+__pycache__/
+*.pyc
