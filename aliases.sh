@@ -66,6 +66,8 @@ alias ksc='kubectl scale'
 
 # Transpara
 alias longhorn-expose="kubectl port-forward --namespace longhorn-system svc/longhorn-frontend 9000:80 --address 0.0.0.0"
+# Release state per version: <version>  <state>  <last transition at>. Usage: relstate [index.yaml]
+relstate() { yq '.versions | to_entries[] | [.key, .value.state, .value.history[-1].at] | join("  ")' "${1:-/tmp/idx/index.yaml}"; }
 
 # Tailscale
 alias tsm="sudo tailscale switch myself"
