@@ -66,8 +66,18 @@ alias ksc='kubectl scale'
 
 # Transpara
 alias longhorn-expose="kubectl port-forward --namespace longhorn-system svc/longhorn-frontend 9000:80 --address 0.0.0.0"
-# Release state per version: <version>  <state>  <last transition at>. Usage: relstate [index.yaml]
-relstate() { yq '.versions | to_entries[] | [.key, .value.state, .value.history[-1].at] | join("  ")' "${1:-/tmp/idx/index.yaml}"; }
+# Release state per version: <version>  <state>  <last transition at>.
+# Usage: relstate [index.yaml]  (no arg = pull live tinstaller-channels:stable)
+relstate() {
+  local f=$1 d=
+  if [ -z "$f" ]; then
+    d=$(mktemp -d) || return
+    oras pull -o "$d" registry.transpara.com/transpara/artifacts/tinstaller-channels:stable >/dev/null || { rm -rf "$d"; return 1; }
+    f=$d/index.yaml
+  fi
+  yq '.versions | to_entries[] | [.key, .value.state, .value.history[-1].at] | join("  ")' "$f"
+  [ -n "$d" ] && rm -rf "$d"
+}
 
 # Tailscale
 alias tsm="sudo tailscale switch myself"
