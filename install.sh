@@ -58,6 +58,7 @@ link_file "$DOTFILES_DIR/nvim" "$HOME/.config/nvim"
 link_file "$DOTFILES_DIR/.tmux.conf" "$HOME/.tmux.conf"
 link_file "$DOTFILES_DIR/tmux-sessionizer" "$HOME/.local/bin/tmux-sessionizer"
 link_file "$DOTFILES_DIR/tmux-windowizer" "$HOME/.local/bin/tmux-windowizer"
+link_file "$DOTFILES_DIR/t" "$HOME/.local/bin/t"
 
 # Link Claude Code configuration
 echo ""
